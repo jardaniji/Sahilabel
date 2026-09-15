@@ -1,0 +1,8 @@
+paddlepaddle==3.2.0
+paddleocr==3.7.0
+fastapi
+uvicorn
+python-multipart
+reportlab
+Pillow
+opencv-python-headless

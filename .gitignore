@@ -1,0 +1,37 @@
+# Python environments and bytecode
+.venv/
+.venv-paddle/
+venv/
+.python312/
+__pycache__/
+*.py[cod]
+
+# OCR, model, and package-manager caches
+.cache/
+.modelscope/
+.paddlex/
+.uv-cache/
+
+# Local runtime evidence and reports
+uploads/
+processed/
+annotated/
+reports/
+files/
+sample_report.pdf
+*.sqlite
+*.sqlite3
+*.db
+
+# Temporary files and logs
+.tmp/
+tmp/
+*.log
+*.tmp
+
+# Editor and operating-system files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

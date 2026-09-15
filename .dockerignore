@@ -1,0 +1,16 @@
+.git/
+.venv*/
+venv/
+.python312/
+__pycache__/
+.cache/
+.modelscope/
+.paddlex/
+.uv-cache/
+.tmp/
+uploads/
+processed/
+annotated/
+reports/
+*.log
+*.pdf
