@@ -1,5 +1,3 @@
-import os
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -38,6 +36,16 @@ def public_config() -> dict:
         "app_name": settings.app_name,
         "environment": settings.environment,
         "max_upload_mb": 15,
-        "postgres_configured": bool(os.getenv("POSTGRES_URL")),
-        "redis_configured": bool(os.getenv("REDIS_URL")),
+        "workflow": "Input -> Image Quality -> CV/OCR -> Applicability -> Rule Validation -> Final Report",
+        "postgres_configured": bool(settings.postgres_url),
+        "redis_configured": bool(settings.redis_url),
+    }
+
+
+@app.get("/api/v1/status")
+def status_summary() -> dict:
+    return {
+        "status": "ok",
+        "architecture_phase": "phase-1-foundation",
+        "workflow": "Input -> Image Quality -> CV/OCR -> Applicability -> Rule Validation -> Final Report",
     }
