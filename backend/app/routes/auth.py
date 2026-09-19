@@ -1,36 +1,32 @@
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
+from app.auth import DEMO_USERS, create_access_token, get_current_user, pwd_context
+
 router = APIRouter(tags=["auth"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
-
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
 
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    role: str = "inspector"
+    role: str
 
 
 @router.post("/auth/login", response_model=TokenResponse)
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    if form_data.username == "admin" and form_data.password == "admin123":
-        return TokenResponse(access_token="demo-token-admin", role="admin")
-    if form_data.username == "inspector" and form_data.password == "inspect123":
-        return TokenResponse(access_token="demo-token-inspector", role="inspector")
-    if form_data.username == "viewer" and form_data.password == "view123":
-        return TokenResponse(access_token="demo-token-viewer", role="viewer")
-
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = DEMO_USERS.get(form_data.username)
+    if not user or not pwd_context.verify(form_data.password, user["hashed_password"]):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
+    token = create_access_token(form_data.username, user["role"])
+    return TokenResponse(access_token=token, role=user["role"])
 
 
 @router.get("/auth/me")
-def me(token: str = Depends(oauth2_scheme)) -> dict:
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-    return {"user": "demo-user", "role": "inspector", "token": token}
+def me(user: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:
+    return {"username": user["username"], "role": user["role"], "authenticated_at": datetime.now(timezone.utc).isoformat()}
