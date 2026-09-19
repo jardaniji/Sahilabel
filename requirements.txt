@@ -6,3 +6,5 @@ python-multipart
 reportlab
 Pillow
 opencv-python-headless
+python-jose[cryptography]
+passlib[bcrypt]
