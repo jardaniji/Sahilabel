@@ -50,11 +50,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     return TokenResponse(access_token=token, role=user["role"])
 
 
-@router.get("/me")
-def me(user: dict = Depends(get_current_user)) -> dict:
-    return {"username": user["username"], "role": user["role"]}
-
-
 def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
     if token is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authenticated")
@@ -63,8 +58,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
         username, role = payload.get("sub"), payload.get("role")
         if username is None or role is None:
             raise JWTError()
-    except JWTError:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token")
+    except JWTError as exc:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token") from exc
     return {"username": username, "role": role}
 
 
@@ -78,3 +73,11 @@ def require_role(*allowed_roles: str):
         return user
 
     return checker
+
+
+# Mount the persisted review API into the existing root app's auth router import.
+# main.py already includes this router, so review endpoints are available without
+# requiring a second application entrypoint.
+from review_api import review_router  # noqa: E402
+
+router.routes.extend(review_router.routes)

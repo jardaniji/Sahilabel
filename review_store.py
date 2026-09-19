@@ -7,14 +7,15 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from inspector_review import InspectorReview, create_inspector_review
+from inspector_review import InspectorReview
 
 DB_PATH = Path("data") / "sahilabel_reviews.sqlite3"
 
 
 def _connect() -> sqlite3.Connection:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    connection = sqlite3.connect(DB_PATH)
+    path = Path(DB_PATH)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(path)
     connection.row_factory = sqlite3.Row
     connection.execute(
         """
@@ -31,9 +32,7 @@ def _connect() -> sqlite3.Connection:
         )
         """
     )
-    connection.execute(
-        "CREATE INDEX IF NOT EXISTS idx_reviews_inspection ON inspector_reviews(inspection_id)"
-    )
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_reviews_inspection ON inspector_reviews(inspection_id)")
     connection.commit()
     return connection
 
@@ -67,8 +66,7 @@ def save_review(inspection_id: str, review: InspectorReview) -> dict[str, Any]:
 def list_reviews(inspection_id: str) -> list[dict[str, Any]]:
     with _connect() as connection:
         rows = connection.execute(
-            "SELECT * FROM inspector_reviews WHERE inspection_id = ? ORDER BY id",
-            (inspection_id,),
+            "SELECT * FROM inspector_reviews WHERE inspection_id = ? ORDER BY id", (inspection_id,)
         ).fetchall()
     return [_row_to_dict(row) for row in rows]
 
@@ -96,6 +94,5 @@ def _row_to_dict(row: sqlite3.Row) -> dict[str, Any]:
         "automated_decision": json.loads(row["automated_decision"]),
         "inspector_decision": row["inspector_decision"],
         "reason": row["reason"],
-        "field_confirmations": json.loads(row["field_confirmations"])
-        if row["field_confirmations"] else None,
+        "field_confirmations": json.loads(row["field_confirmations"]) if row["field_confirmations"] else None,
     }

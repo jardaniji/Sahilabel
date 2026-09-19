@@ -22,17 +22,11 @@ class ReviewRequest(BaseModel):
 
 
 @review_router.post("/{inspection_id}/reviews", status_code=status.HTTP_201_CREATED)
-def create_review(
-    inspection_id: str,
-    request: ReviewRequest,
-    user: dict[str, Any] = Depends(require_role("admin", "inspector")),
-) -> dict[str, Any]:
+def create_review(inspection_id: str, request: ReviewRequest, user: dict[str, Any] = Depends(require_role("admin", "inspector"))) -> dict[str, Any]:
     try:
         review = create_inspector_review(
-            reviewer=user["username"],
-            automated_decision=request.automated_decision,
-            inspector_decision=request.inspector_decision,
-            reason=request.reason,
+            reviewer=user["username"], automated_decision=request.automated_decision,
+            inspector_decision=request.inspector_decision, reason=request.reason,
             field_confirmations=request.field_confirmations,
         )
     except ValueError as exc:
@@ -41,18 +35,12 @@ def create_review(
 
 
 @review_router.get("/{inspection_id}/reviews")
-def get_reviews(
-    inspection_id: str,
-    user: dict[str, Any] = Depends(require_role("admin", "inspector", "viewer")),
-) -> list[dict[str, Any]]:
+def get_reviews(inspection_id: str, user: dict[str, Any] = Depends(require_role("admin", "inspector", "viewer"))) -> list[dict[str, Any]]:
     return list_reviews(inspection_id)
 
 
 @review_router.get("/{inspection_id}/final-decision")
-def get_final_decision(
-    inspection_id: str,
-    user: dict[str, Any] = Depends(require_role("admin", "inspector", "viewer")),
-) -> dict[str, Any]:
+def get_final_decision(inspection_id: str, user: dict[str, Any] = Depends(require_role("admin", "inspector", "viewer"))) -> dict[str, Any]:
     result = final_decision(inspection_id)
     if result is None:
         raise HTTPException(status_code=404, detail="No review exists for this inspection")
