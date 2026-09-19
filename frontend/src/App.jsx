@@ -16,20 +16,29 @@ const stack = ['React + Vite', 'FastAPI', 'OpenCV + PaddleOCR', 'PostgreSQL', 'R
 export default function App() {
   const [productName, setProductName] = useState('Sample label');
   const [imageCount, setImageCount] = useState(2);
+  const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
   async function createInspection() {
     setLoading(true);
+    setResult(null);
+
     try {
-      const response = await fetch('http://localhost:8000/api/v1/inspections', {
+      const formData = new FormData();
+      if (file) {
+        formData.append('file', file, file.name);
+      }
+      formData.append('product_name', productName || 'Sample label');
+      formData.append('image_count', String(imageCount));
+
+      const response = await fetch('http://localhost:8000/api/v1/inspections/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_name: productName, image_count: imageCount, source: 'upload' }),
+        body: formData,
       });
 
       const data = await response.json();
-      setResult({ ok: response.ok, data });
+      setResult({ ok: response.ok, status: response.status, data });
     } catch (error) {
       setResult({ ok: false, data: { detail: String(error) } });
     } finally {
@@ -69,7 +78,7 @@ export default function App() {
       </section>
 
       <section className="panel compact">
-        <h2>Create a demo inspection</h2>
+        <h2>Upload and analyze label</h2>
         <div className="form-row">
           <label>
             Product name
@@ -87,8 +96,19 @@ export default function App() {
           </label>
         </div>
 
+        <div className="form-row">
+          <label>
+            Image file
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </label>
+        </div>
+
         <button className="primary-btn" onClick={createInspection} disabled={loading}>
-          {loading ? 'Creating…' : 'Create inspection'}
+          {loading ? 'Analyzing…' : 'Analyze label'}
         </button>
 
         {result && (

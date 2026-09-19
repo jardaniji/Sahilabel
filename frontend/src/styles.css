@@ -57,6 +57,11 @@ h1 {
   font-weight: 600;
 }
 
+.primary-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
 .panel {
   background: rgba(15, 23, 42, 0.8);
   border: 1px solid rgba(148, 163, 184, 0.15);
@@ -67,7 +72,8 @@ h1 {
 }
 
 .flow-grid,
-.stack-grid {
+.stack-grid,
+.form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
@@ -86,13 +92,6 @@ h1 {
   justify-content: center;
   text-align: center;
   font-weight: 600;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
 }
 
 label {
