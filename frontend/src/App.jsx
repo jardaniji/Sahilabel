@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 const workflow = [
   'Input',
   'Image Quality',
@@ -9,16 +11,32 @@ const workflow = [
   'Analytics Hub',
 ];
 
-const stack = [
-  'React + Vite',
-  'FastAPI',
-  'OpenCV + PaddleOCR',
-  'PostgreSQL',
-  'Redis',
-  'RBAC',
-];
+const stack = ['React + Vite', 'FastAPI', 'OpenCV + PaddleOCR', 'PostgreSQL', 'Redis', 'RBAC'];
 
 export default function App() {
+  const [productName, setProductName] = useState('Sample label');
+  const [imageCount, setImageCount] = useState(2);
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  async function createInspection() {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:8000/api/v1/inspections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_name: productName, image_count: imageCount, source: 'upload' }),
+      });
+
+      const data = await response.json();
+      setResult({ ok: response.ok, data });
+    } catch (error) {
+      setResult({ ok: false, data: { detail: String(error) } });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="app-shell">
       <header className="hero">
@@ -26,7 +44,6 @@ export default function App() {
           <p className="eyebrow">SAHILABEL</p>
           <h1>Legal Metrology Compliance Workflow</h1>
         </div>
-        <button className="primary-btn">New Inspection</button>
       </header>
 
       <section className="panel">
@@ -52,14 +69,33 @@ export default function App() {
       </section>
 
       <section className="panel compact">
-        <h2>Phase 1 architecture alignment</h2>
-        <ul>
-          <li>Frontend scaffold for React + Vite</li>
-          <li>Backend app structure for FastAPI</li>
-          <li>RBAC/auth route placeholders</li>
-          <li>Redis + PostgreSQL configuration scaffold</li>
-          <li>Workflow-aligned inspection service</li>
-        </ul>
+        <h2>Create a demo inspection</h2>
+        <div className="form-row">
+          <label>
+            Product name
+            <input value={productName} onChange={(e) => setProductName(e.target.value)} />
+          </label>
+          <label>
+            Image count
+            <input
+              type="number"
+              min="1"
+              max="8"
+              value={imageCount}
+              onChange={(e) => setImageCount(Number(e.target.value) || 1)}
+            />
+          </label>
+        </div>
+
+        <button className="primary-btn" onClick={createInspection} disabled={loading}>
+          {loading ? 'Creating…' : 'Create inspection'}
+        </button>
+
+        {result && (
+          <pre className="result-box">
+            {JSON.stringify(result, null, 2)}
+          </pre>
+        )}
       </section>
     </div>
   );

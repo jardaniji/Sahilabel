@@ -88,6 +88,39 @@ h1 {
   font-weight: 600;
 }
 
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+
+input {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  color: white;
+  padding: 10px 12px;
+  font-size: 1rem;
+}
+
+.result-box {
+  margin-top: 16px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  padding: 16px;
+  overflow: auto;
+  white-space: pre-wrap;
+  color: #d9e7ff;
+}
+
 .compact ul {
   margin: 0;
   padding-left: 18px;

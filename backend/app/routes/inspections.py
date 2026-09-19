@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
+from app.services.inspection_store import create_demo_record, get_inspection_record
+
 router = APIRouter(tags=["inspections"])
 
 
@@ -35,8 +37,11 @@ def create_inspection(payload: InspectionCreate) -> InspectionResult:
     if not payload.product_name.strip():
         raise HTTPException(status_code=400, detail="Product name is required")
 
+    inspection_id = f"insp-{abs(hash(payload.product_name)) % 100000:05d}"
+    create_demo_record(inspection_id, payload.product_name, payload.image_count)
+
     return InspectionResult(
-        inspection_id="insp-demo-001",
+        inspection_id=inspection_id,
         status="QUEUED",
         product_name=payload.product_name,
         image_count=payload.image_count,
@@ -45,9 +50,7 @@ def create_inspection(payload: InspectionCreate) -> InspectionResult:
 
 @router.get("/inspections/{inspection_id}")
 def get_inspection(inspection_id: str) -> dict:
-    return {
-        "inspection_id": inspection_id,
-        "status": "PROCESSING",
-        "workflow": "Input -> Image Quality -> CV/OCR -> Applicability -> Rule Validation -> Final Report",
-        "notes": "This route is scaffolded for the phase-1 architecture alignment pass.",
-    }
+    record = get_inspection_record(inspection_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Inspection not found")
+    return record
