@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from fastapi import Depends, HTTPException, status
@@ -21,7 +21,7 @@ DEMO_USERS: dict[str, dict[str, Any]] = {
 
 
 def create_access_token(username: str, role: str) -> str:
-    expires_at = datetime.now(timezone.utc) + settings.jwt_expire_minutes
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_expire_minutes)
     payload = {"sub": username, "role": role, "exp": expires_at}
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
