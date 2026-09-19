@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -26,4 +28,16 @@ def healthcheck() -> dict:
         "app": settings.app_name,
         "environment": settings.environment,
         "version": settings.app_version,
+        "workflow": "Input -> Image Quality -> CV/OCR -> Applicability -> Rule Validation -> Final Report",
+    }
+
+
+@app.get("/api/v1/config")
+def public_config() -> dict:
+    return {
+        "app_name": settings.app_name,
+        "environment": settings.environment,
+        "max_upload_mb": 15,
+        "postgres_configured": bool(os.getenv("POSTGRES_URL")),
+        "redis_configured": bool(os.getenv("REDIS_URL")),
     }
